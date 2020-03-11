@@ -34,6 +34,11 @@ namespace Penumbra.Windows
 
 			cb_Filter.Checked = tb_FilterLevel.Enabled = Program.Filtering;
 			tb_FilterLevel.Value = Program.m_INI.ReadInteger(@"Filter", @"level");
+
+            cb_Hue.Checked = Program.Hueing;
+            nud_RedHue.Value = Program.m_INI.ReadInteger(@"Hue", @"RHlevel");
+            nud_GreenHue.Value = Program.m_INI.ReadInteger(@"Hue", @"GHlevel");
+            nud_BlueHue.Value = Program.m_INI.ReadInteger(@"Hue", @"BHlevel");
 			
 			cb_IncreaseCtrl.Checked = (Program.m_HotkeyIncrease.Control);
 			cb_IncreaseShift.Checked = (Program.m_HotkeyIncrease.Shift);
@@ -138,7 +143,40 @@ namespace Penumbra.Windows
 
         }
 
-		private void IncreaseModifierChanged(object sender, EventArgs e)
+        private void cb_Hue_CheckedChanged(object sender, EventArgs e)
+        {
+            if (InternalChangeInProgress)
+                return;
+
+            Program.ToggleHue();
+
+        }
+        private void nud_RedHue_Change(object sender, EventArgs e)
+        {
+            if (InternalChangeInProgress)
+                return;
+
+            Program.SetGreenHue(Convert.ToInt32(nud_RedHue.Value));
+        }
+        private void nud_GreenHue_Change(object sender, EventArgs e)
+        {
+
+            if (InternalChangeInProgress)
+                return;
+
+            Program.SetGreenHue(Convert.ToInt32(nud_GreenHue.Value));
+
+        }
+        private void nud_BlueHue_Change(object sender, EventArgs e)
+        {
+
+            if (InternalChangeInProgress)
+                return;
+
+            Program.SetBlueHue(Convert.ToInt32(nud_BlueHue.Value));
+
+        }
+        private void IncreaseModifierChanged(object sender, EventArgs e)
 		{
 
 			if (InternalChangeInProgress)
@@ -253,8 +291,10 @@ namespace Penumbra.Windows
 
 		}
 
-#endregion
 
-	}
+        #endregion
+
+       
+    }
 
 }

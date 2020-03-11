@@ -16,12 +16,13 @@ namespace Penumbra
 
 		private const int MIN_FILTER_LEVEL = 0;
 		private const int MAX_FILTER_LEVEL = 100;
+        private const int MIN_HUE_LEVEL = 0;
+        private const int MAX_HUE_LEVEL = 128;
+        #endregion
 
-#endregion
+        #region Variables
 
-#region Variables
-
-		public static INI m_INI = new INI("settings.ini");
+        public static INI m_INI = new INI("settings.ini");
 
 		public static ContextMenu m_ContextMenu;
 		public static NotifyIcon m_NotifyIcon;
@@ -46,22 +47,48 @@ namespace Penumbra
 			set { m_INI.WriteValue(@"Filter", @"active", (value ? "1" : "0")); }
             //this will cause problems if the folder is readOnly
 		}
+        public static bool Hueing
+        {
 
-		public static int FilterLevel
+            get { return m_INI.ReadBoolean(@"Hue", @"Hactive"); }
+
+            set { m_INI.WriteValue(@"Hue", @"Hactive", (value ? "1" : "0")); }
+            //this will cause problems if the folder is readOnly
+        }
+        public static int FilterLevel
 		{
 
 			get { return m_INI.ReadInteger(@"Filter", @"level"); }
 
 		}
 
-#endregion
+        public static int RedHueLevel
+        {
 
-#region Ctor
+            get { return m_INI.ReadInteger(@"Hue", @"RHlevel"); }
 
-		/// <summary>
-		/// The main entry point for the application.
-		/// </summary>
-		[STAThread]
+        }
+        public static int GreenHueLevel
+        {
+
+            get { return m_INI.ReadInteger(@"Hue", @"GHlevel"); }
+
+        }
+        public static int BlueHueLevel
+        {
+
+            get { return m_INI.ReadInteger(@"Hue", @"BHlevel"); }
+
+        }
+
+        #endregion
+
+        #region Ctor
+
+        /// <summary>
+        /// The main entry point for the application.
+        /// </summary>
+        [STAThread]
 		static void Main()
 		{
 
@@ -116,7 +143,7 @@ namespace Penumbra
 			// Check the initial filter state and act according it
 			//
 			if (Filtering)
-				Filter.SetBrightness(FilterLevelToBrightness(byte.Parse(FilterLevel.ToString(CultureInfo.InvariantCulture))));
+				Filter.SetBrightness(FilterLevelToBrightness(byte.Parse(FilterLevel.ToString(CultureInfo.InvariantCulture))),Hueing,RedHueLevel,GreenHueLevel,BlueHueLevel);
 
             Monitors.Instance.Init();
 
@@ -124,11 +151,18 @@ namespace Penumbra
 
 		}
 
-#endregion
+        #endregion
 
-#region Public Functions
+        #region Public Functions
 
-		public static void ToggleFilter()
+        public static void ToggleHue()
+        {
+            Hueing = !Hueing;
+
+            Filter.SetBrightness(FilterLevelToBrightness(FilterLevel), Hueing, RedHueLevel, GreenHueLevel, BlueHueLevel);
+
+        }
+        public static void ToggleFilter()
 		{
 
 			if (Filtering)
@@ -160,7 +194,7 @@ namespace Penumbra
 
 				m_NotifyIcon.Icon = Properties.Resources.eye_on;
 
-				Filter.SetBrightness(FilterLevelToBrightness(byte.Parse(m_INI.ReadString(@"Filter", @"level"))));
+				Filter.SetBrightness(FilterLevelToBrightness(byte.Parse(m_INI.ReadString(@"Filter", @"level"))), m_INI.ReadBoolean(@"Hue", @"Hactive"), m_INI.ReadInteger(@"Hue", @"RHlevel"), m_INI.ReadInteger(@"Hue", @"GHlevel"), m_INI.ReadInteger(@"Hue", @"BHlevel"));
 
 				m_HotkeyIncrease.Enabled = m_HotkeyDecrease.Enabled = true;
 
@@ -204,8 +238,84 @@ namespace Penumbra
 			return (byte) (Math.Abs(p_FilterLevel - 100) + 10);
 
 		}
+        public static void SetRedHue(int p_RedHueLevel)
+        {
+            if (p_RedHueLevel < MIN_HUE_LEVEL)
+                p_RedHueLevel = MIN_HUE_LEVEL;
+            else if (p_RedHueLevel > MAX_HUE_LEVEL)
+                p_RedHueLevel = MAX_HUE_LEVEL;
 
-		public static void SetBrightness(int p_FilterLevel)
+            Filter.SetBrightness(FilterLevelToBrightness(FilterLevel),Hueing, p_RedHueLevel, GreenHueLevel,BlueHueLevel);
+
+            if (m_SettingsWindow != null)
+                m_SettingsWindow.nud_RedHue.Value = p_RedHueLevel;
+
+            m_INI.WriteValue(@"Hue", @"RHlevel", p_RedHueLevel.ToString(CultureInfo.InvariantCulture));
+
+            if (Hueing)
+            {
+                m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"% {R" + RedHueLevel + "G" + GreenHueLevel + "B" + BlueHueLevel + "})";
+            }
+            else
+            {
+                m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"%)";
+
+            }
+
+        }
+        public static void SetGreenHue(int p_GreenHueLevel)
+        {
+            if (p_GreenHueLevel < MIN_HUE_LEVEL)
+                p_GreenHueLevel = MIN_HUE_LEVEL;
+            else if (p_GreenHueLevel > MAX_HUE_LEVEL)
+                p_GreenHueLevel = MAX_HUE_LEVEL;
+
+            Filter.SetBrightness(FilterLevelToBrightness(FilterLevel), Hueing, RedHueLevel, p_GreenHueLevel, BlueHueLevel);
+
+            if (m_SettingsWindow != null)
+                m_SettingsWindow.nud_RedHue.Value = p_GreenHueLevel;
+
+            m_INI.WriteValue(@"Hue", @"GHlevel", p_GreenHueLevel.ToString(CultureInfo.InvariantCulture));
+
+            if (Hueing)
+            {
+                m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"% {R" + RedHueLevel + "G" + GreenHueLevel + "B" + BlueHueLevel + "})";
+            }
+            else
+            {
+                m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"%)";
+
+            }
+
+
+        }
+        public static void SetBlueHue(int p_BlueHueLevel)
+        {
+            if (p_BlueHueLevel < MIN_HUE_LEVEL)
+                p_BlueHueLevel = MIN_HUE_LEVEL;
+            else if (p_BlueHueLevel > MAX_HUE_LEVEL)
+                p_BlueHueLevel = MAX_HUE_LEVEL;
+
+            Filter.SetBrightness(FilterLevelToBrightness(FilterLevel), Hueing, RedHueLevel, GreenHueLevel, p_BlueHueLevel);
+
+            if (m_SettingsWindow != null)
+                m_SettingsWindow.nud_BlueHue.Value = p_BlueHueLevel;
+
+            m_INI.WriteValue(@"Hue", @"BHlevel", p_BlueHueLevel.ToString(CultureInfo.InvariantCulture));
+
+            if (Hueing)
+            {
+                m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"% {R" + RedHueLevel + "G" + GreenHueLevel + "B" + BlueHueLevel + "})";
+            }
+            else
+            {
+                m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"%)";
+
+            }
+
+
+        }
+        public static void SetBrightness(int p_FilterLevel)
 		{
 
 			if (p_FilterLevel < MIN_FILTER_LEVEL)
@@ -213,16 +323,24 @@ namespace Penumbra
 			else if (p_FilterLevel > MAX_FILTER_LEVEL)
 				p_FilterLevel = MAX_FILTER_LEVEL;
 
-			Filter.SetBrightness(FilterLevelToBrightness(p_FilterLevel));
+			Filter.SetBrightness(FilterLevelToBrightness(p_FilterLevel), Hueing, RedHueLevel, GreenHueLevel, BlueHueLevel);
 
 			if (m_SettingsWindow != null)
 				m_SettingsWindow.tb_FilterLevel.Value = p_FilterLevel;
 
             m_INI.WriteValue(@"Filter", @"level", p_FilterLevel.ToString(CultureInfo.InvariantCulture));
 
-			m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"%)";
+            if (Hueing)
+            {
+                m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"% {R" + RedHueLevel + "G" + GreenHueLevel + "B" + BlueHueLevel + "})";
+            }
+            else
+            {
+                m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"%)";
 
-		}
+            }
+
+        }
 
 #endregion
 

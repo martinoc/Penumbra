@@ -77,54 +77,25 @@ namespace Penumbra.Classes
 #endregion
 
 #region Public Functions
+		
+        public static bool SetBrightness(byte p_Brightness, bool Hue, int RedHue, int BlueHue, int GreenHue)
+        {
 
-		public static bool SetBrightness(byte p_Brightness)
-		{
+            if (p_Brightness < MIN_BRIGHTNESS || p_Brightness > MAX_BRIGHTNESS)
+                return false;
 
-			if (p_Brightness < MIN_BRIGHTNESS || p_Brightness > MAX_BRIGHTNESS)
-				return false;
+            m_CurrentBrightness = p_Brightness;
 
-			m_CurrentBrightness = p_Brightness;
-
-			RAMP c_Ramp = CalculateRAMP(p_Brightness);
+            RAMP c_Ramp = CalculateRAMP(p_Brightness, Hue, RedHue, BlueHue, GreenHue);
 
             SetDeviceGammaRamp(GetDC(IntPtr.Zero), ref c_Ramp);
 
-			return true;
-		}
-
-		public static void ResetBrightness()
+            return true;
+        }
+        public static void ResetBrightness()
 		{
 
 			SetDeviceGammaRamp(GetDC(IntPtr.Zero), ref m_InitialRAMP);
-
-		}
-
-		public static byte IncreaseBrightness()
-		{
-
-			m_CurrentBrightness += 10;
-
-			if (m_CurrentBrightness > MAX_BRIGHTNESS)
-				m_CurrentBrightness = MAX_BRIGHTNESS;
-
-			SetBrightness(m_CurrentBrightness);
-
-			return m_CurrentBrightness;
-
-		}
-
-		public static byte DecreaseBrightness()
-		{
-
-			m_CurrentBrightness -= 10;
-
-			if (m_CurrentBrightness < MIN_BRIGHTNESS)
-				m_CurrentBrightness = MIN_BRIGHTNESS;
-
-			SetBrightness(m_CurrentBrightness);
-
-			return m_CurrentBrightness;
 
 		}
 
@@ -151,22 +122,32 @@ namespace Penumbra.Classes
 		}
 
 // ReSharper disable InconsistentNaming
-		private static RAMP CalculateRAMP(byte p_Brightness)
+		private static RAMP CalculateRAMP(byte p_Brightness, bool Hue, int RedHue, int BlueHue, int GreenHue)
 // ReSharper restore InconsistentNaming
 		{
 
 			RAMP c_Ramp = new RAMP { Red = new ushort[256], Green = new ushort[256], Blue = new ushort[256] };
 
-			for (int c_Index = 0; c_Index < 256; c_Index++)
-			{
+            if (!Hue)
+            {
+                RedHue = 128;
+                GreenHue = 128;
+                BlueHue = 128;
+            }
 
-				c_Ramp.Red[c_Index] = (ushort) (c_Index * (p_Brightness + 128));
-				c_Ramp.Green[c_Index] = (ushort) (c_Index * (p_Brightness + 128));
-				c_Ramp.Blue[c_Index] = (ushort) (c_Index * (p_Brightness + 128));
+            for (int c_Index = 0; c_Index < 256; c_Index++)
+            {
+                
+                c_Ramp.Red[c_Index] = (ushort)(c_Index * (p_Brightness + RedHue));
+                c_Ramp.Green[c_Index] = (ushort)(c_Index * (p_Brightness + GreenHue));
+                c_Ramp.Blue[c_Index] = (ushort)(c_Index * (p_Brightness + BlueHue));
 
-			}
+            }
 
-			return c_Ramp;
+
+
+
+            return c_Ramp;
 
 		}
 
