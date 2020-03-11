@@ -273,7 +273,7 @@ namespace Penumbra
             Filter.SetBrightness(FilterLevelToBrightness(FilterLevel), Hueing, RedHueLevel, p_GreenHueLevel, BlueHueLevel);
 
             if (m_SettingsWindow != null)
-                m_SettingsWindow.nud_RedHue.Value = p_GreenHueLevel;
+                m_SettingsWindow.nud_GreenHue.Value = p_GreenHueLevel;
 
             m_INI.WriteValue(@"Hue", @"GHlevel", p_GreenHueLevel.ToString(CultureInfo.InvariantCulture));
 
