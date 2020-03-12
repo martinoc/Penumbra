@@ -78,7 +78,7 @@ namespace Penumbra.Classes
 
 #region Public Functions
 		
-        public static bool SetBrightness(byte p_Brightness, bool Hue, int RedHue, int BlueHue, int GreenHue)
+        public static bool SetBrightness(byte p_Brightness, bool Hue, int RedHue, int GreenHue, int BlueHue)
         {
 
             if (p_Brightness < MIN_BRIGHTNESS || p_Brightness > MAX_BRIGHTNESS)
@@ -86,7 +86,7 @@ namespace Penumbra.Classes
 
             m_CurrentBrightness = p_Brightness;
 
-            RAMP c_Ramp = CalculateRAMP(p_Brightness, Hue, RedHue, BlueHue, GreenHue);
+            RAMP c_Ramp = CalculateRAMP(p_Brightness, Hue, RedHue, GreenHue, BlueHue);
 
             SetDeviceGammaRamp(GetDC(IntPtr.Zero), ref c_Ramp);
 
@@ -116,13 +116,18 @@ namespace Penumbra.Classes
 		private static byte GetBrightnessFromRAMP(RAMP p_Ramp)
 // ReSharper restore InconsistentNaming
 		{
-
-			return (byte) (p_Ramp.Blue[1] - 128);
-
-		}
+            if (Program.Hueing)
+            {
+                return (byte)(p_Ramp.Blue[1] - Program.BlueHueLevel);
+            }
+            else
+            {
+                return (byte)(p_Ramp.Blue[1] - 128);
+            }
+        }
 
 // ReSharper disable InconsistentNaming
-		private static RAMP CalculateRAMP(byte p_Brightness, bool Hue, int RedHue, int BlueHue, int GreenHue)
+		private static RAMP CalculateRAMP(byte p_Brightness, bool Hue, int RedHue, int GreenHue, int BlueHue)
 // ReSharper restore InconsistentNaming
 		{
 
@@ -143,9 +148,6 @@ namespace Penumbra.Classes
                 c_Ramp.Blue[c_Index] = (ushort)(c_Index * (p_Brightness + BlueHue));
 
             }
-
-
-
 
             return c_Ramp;
 
