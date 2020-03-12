@@ -159,8 +159,10 @@ namespace Penumbra
         {
             Hueing = !Hueing;
 
-            Filter.SetBrightness(FilterLevelToBrightness(FilterLevel), Hueing, RedHueLevel, GreenHueLevel, BlueHueLevel);
-
+            if (Filtering)
+            {
+                Filter.SetBrightness(FilterLevelToBrightness(FilterLevel), Hueing, RedHueLevel, GreenHueLevel, BlueHueLevel);
+            }
         }
         public static void ToggleFilter()
 		{
@@ -279,7 +281,7 @@ namespace Penumbra
 
             if (Hueing)
             {
-                m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"% {R" + RedHueLevel + "G" + GreenHueLevel + "B" + BlueHueLevel + "})";
+                m_NotifyIcon.Text = @"Penumbra - On (" + FilterLevel + @"% {R" + RedHueLevel + "G" + p_GreenHueLevel + "B" + BlueHueLevel + "})";
             }
             else
             {

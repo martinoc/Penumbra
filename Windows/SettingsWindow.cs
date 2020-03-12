@@ -156,7 +156,7 @@ namespace Penumbra.Windows
             if (InternalChangeInProgress)
                 return;
 
-            Program.SetGreenHue(Convert.ToInt32(nud_RedHue.Value));
+            Program.SetRedHue(Convert.ToInt32(nud_RedHue.Value));
         }
         private void nud_GreenHue_Change(object sender, EventArgs e)
         {
